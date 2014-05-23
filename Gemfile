@@ -35,6 +35,10 @@ group :production do
 end
 
 
+# Devise
+gem 'devise', '~> 3.2.2'
+
+
 # Bootstrap 3
 group :development, :test do
   gem 'rails_layout', '~> 0.5.11'  # Bootstrap 3 layout generator
@@ -52,3 +56,8 @@ end
 group :test do
   gem "capybara", '~> 2.2.1'
 end
+
+# Vanity
+gem "vanity"
+gem "redis", ">= 2.1"
+gem "redis-namespace", ">= 1.1.0"
