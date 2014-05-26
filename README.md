@@ -21,6 +21,7 @@ A/BテストフレームワークVanity入門
 + [RailsでA/Bテスト](#2)
 + [Javascriptで参加者登録](#3)
 + [テスト](#4)
++ [Herokuにデプロイする](#5)
 
 # 詳細
 ## <a name="1">セットアップ</a>
@@ -158,10 +159,56 @@ tests/specsのビューテストや受け入れテストで実験結果を簡単
 Vanity.playground.experiment(:price_options).chooses(19)
 ```
 
-
-
-
+## <a name="4">Herokuにデプロイする</a>
+_config/vanity.yml_追加
+```ruby
+development:
+  adapter: redis
+  connection: redis://localhost:6379/0
+test:
+  collecting: false
+production:
+  adapter: redis
+  connection: <%= ENV["REDISTOGO_URL"] %>
+```
+_config/initializers/redis.rb_追加
+```ruby
+namespace = [Rails.application.class.parent_name, Rails.env].join ':'
+if Rails.env.production?
+  # herokuの初期 asset compileでENVがうまく読み込まれていないっぽいので対策
+  if ENV['REDISCLOUD_URL']
+      redis_uri = URI(ENV['REDISCLOUD_URL'])
+      Redis.current = Redis.new(host: redis_uri.host, port: redis_uri.port, password: redis_uri.password)
+      Redis.current = Redis::Namespace.new(namespace, Redis.new(host: redis_uri.host, port: redis_uri.port, password: redis_uri.password))
+  end
+else
+  Redis.current = Redis::Namespace.new(namespace, Redis.new(host: '127.0.0.1', port: 6379))
+end
+```
+Gem追加
+```
+# Vanity
+gem "vanity"
+gem "redis", ">= 2.1"
+gem "redis-namespace", ">= 1.1.0"
+gem "redis-objects"
+```
+反映してコミット
+```bash
+$ bundle
+$ git commit -am setup
+```
+Herokuセットアップ
+```bash
+$ heroku create --addons heroku-postgresql
+$ heroku addons:add redistogo
+$ git push heroku master
+$ heroku apps:rename vanity-introduction
+$ heroku open
+```
 
 # 参照
 + [VanityExperimentDriven Development](http://vanity.labnotes.org/)
 + [assaf/vanity](https://github.com/assaf/vanity)
++ [【Redis Cloud無料25MB】Rails4 × Heroku × Redisを超簡単セットアップ！](http://morizyun.github.io/blog/redis-coloud-heroku-rails4-redis-object/)
++ [railsでredis-objectsを使う際にはredis-namespaceも使ったほうがいいかも](http://qiita.com/ichi_s/items/e36b0891c6ca9a9a58f9)

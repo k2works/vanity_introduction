@@ -1,3 +1,8 @@
+development:
+  adapter: redis
+  connection: redis://localhost:6379/0
+test:
+  collecting: false
 production:
   adapter: redis
   connection: <%= ENV["REDISTOGO_URL"] %>

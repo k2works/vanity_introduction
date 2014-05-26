@@ -61,3 +61,4 @@ end
 gem "vanity"
 gem "redis", ">= 2.1"
 gem "redis-namespace", ">= 1.1.0"
+gem "redis-objects"
